@@ -16,43 +16,34 @@
 --1&2 ARE ROW LEVEL TRIGGERS
 
 
---
---CREATE OR REPLACE FUNCTION CheckContractVal(TaskIDIN VarChar) RETURN l_contractVal
---AS
---l_contractVal Number;
---Begin
---l_contractval := 3;
-----Select ContractCount into l_contractVal from Task Where TaskIDIn = Task.TaskID;
---DBMS_OUTPUT.PUT_LINE('Made it into checkval procedure');
---return l_contractVal;
---End;
---/
-
-
+-- BUG IS UPDATING EVERY TASK WITH CONCOUNT
 CREATE or REPLACE TRIGGER NewContract
 BEFORE INSERT ON Contract FOR EACH ROW
 DECLARE
 conCount Number;
 BEGIN
 
-select ContractCount into conCount from Task Where taskID = :new.taskID;
+Select ContractCount into conCount from Task Where taskID = :new.taskID;
+DBMS_OUTPUT.PUT_LINE('tASKid BEING UPDATED ' || :new.taskID);
+
 IF conCount < 3 Then
-    
-    DBMS_OUTPUT.PUT_LINE('Countract COunt less than 3');
+    conCount := conCount +1;
+    Update Task SET contractCount = conCount Where taskID = :new.taskID;
+    DBMS_OUTPUT.PUT_LINE('Countract COunt= ' || concount);
 ELSE
-    DBMS_OUTPUT.PUT_LINE('Error, contract is full');
-    
+    raise_application_error (-20101,'Contract is full');
 End IF;
 END;
 /
 
 
 
---insert into contract values('900','1',0);
-Select * from task;
+insert into contract values('901','9',0);
+--Select * from task;
 
---Insert into Task VALUES ('900', 'Construction',0);
+--Insert into Task VALUES ('901', 'Gardening',0);
 
+--UPDATE Task SET ContractCount = 0 WHere TaskID = 333;
 
 
 
