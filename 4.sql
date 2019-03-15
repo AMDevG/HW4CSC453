@@ -15,29 +15,43 @@
         
 --1&2 ARE ROW LEVEL TRIGGERS
 
---Select * from contract;
---Select * from task;
 
-CREATE OR REPLACE PROCEDURE CheckContractVal(TaskIDIN VARCHAR)
-AS
-contractval Number;
-Begin
-Select ContractCount into contractVal from Task Where TaskIDIn = Task.TaskID;
-DBMS_OUTPUT.PUT_LINE('Made it into checkval procedure');
-End;
-/
+--
+--CREATE OR REPLACE FUNCTION CheckContractVal(TaskIDIN VarChar) RETURN l_contractVal
+--AS
+--l_contractVal Number;
+--Begin
+--l_contractval := 3;
+----Select ContractCount into l_contractVal from Task Where TaskIDIn = Task.TaskID;
+--DBMS_OUTPUT.PUT_LINE('Made it into checkval procedure');
+--return l_contractVal;
+--End;
+--/
+
 
 CREATE or REPLACE TRIGGER NewContract
-BEFORE INSERT ON Contract
+BEFORE INSERT ON Contract FOR EACH ROW
+DECLARE
+conCount Number;
 BEGIN
-DBMS_OUTPUT.PUT_LINE('Firing Contract Insert Trigger, Calling procedure');
---CheckContractVal('896');
+
+select ContractCount into conCount from Task Where taskID = :new.taskID;
+IF conCount < 3 Then
+    
+    DBMS_OUTPUT.PUT_LINE('Countract COunt less than 3');
+ELSE
+    DBMS_OUTPUT.PUT_LINE('Error, contract is full');
+    
+End IF;
 END;
 /
 
---insert into contract values('896','1',0);
---Select * from task;
 
+
+--insert into contract values('900','1',0);
+Select * from task;
+
+--Insert into Task VALUES ('900', 'Construction',0);
 
 
 
