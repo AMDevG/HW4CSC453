@@ -41,19 +41,17 @@ CREATE or REPLACE TRIGGER NoChanges
 Before Update ON Contract
 DECLARE
 BEGIN
-     DBMS_OUTPUT.PUT_LINE('FIring No Changes');
+     DBMS_OUTPUT.PUT_LINE('Firing No Changes Blocking Update');
     raise_application_error (-20101,'No Updates are Permitted');
 END;
 /
-
-
 --DELETE FROM CONTRACT WHERE TASKID = '333';
-UPDATE CONTRACT SET TASKID = '123' WHERE TASKID = '333';
+--UPDATE CONTRACT SET WorkerID = '12' WHERE TASKID = '333';
 --Select * from task;
---Select * from Contract;
+--Select * from contract;
 --Insert into Task VALUES ('901', 'Gardening',0);
---Insert into Contract Values ('333', '59', 0);
---UPDATE Task SET ContractCount = 0 WHere TaskID = 333;
+--Insert into Contract Values ('896', '04', 0);
+
 
 
 
