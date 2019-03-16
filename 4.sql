@@ -1,22 +1,3 @@
--- WRITE 3 TRIGGERS 
--- MAINTAIN VALUE OF CONTRACTCOUNT ATTRIBUTE IN TASK
---1) NEWCONTRACT TRIGGER
-        -- CHECK VALUE OF CONTRACTCOUNT, IF LESS THAN 3 ALLOW INSERT OF ANOTHER WORKER.
-                -- IF = 3, CANCEL INSERT, DISPLAY ERROR MESSAGE THAT IT IS FULL
-
---2) ENDCONTRACT TRIGGER
-        -- FIRES WHEN USER ATTEMPTS TO DELETE ONE OR MORE ROWS FROM CONTRACT
-            --  UPDATES VALUES OF CONTRACT COUNT FOR ANY EFFECTED TASK
-            -- DECREASES VALUE OF CONTRACTCOUNT EACH TIME A WORKER IS REMOVED
---3) NOCHANGES TRIGGER
-        -- FIRES WHEN USER ATTEMPTS TO UPDATE ONE OR MORE ROWS OF CONTRACT
-        -- CANCELS UPDATES AND DISPLAYS ERROR MESSAGE STATING NO UPDATES ARE PERMITTED TO EXISTING ROWS
-        -- STATEMENT LEVEL TRIGGER
-        
---1&2 ARE ROW LEVEL TRIGGERS
-
-
--- BUG IS UPDATING EVERY TASK WITH CONCOUNT
 CREATE or REPLACE TRIGGER NewContract
 BEFORE INSERT ON Contract FOR EACH ROW
 DECLARE
@@ -24,7 +5,7 @@ conCount Number;
 BEGIN
 
 Select ContractCount into conCount from Task Where taskID = :new.taskID;
-DBMS_OUTPUT.PUT_LINE('tASKid BEING UPDATED ' || :new.taskID);
+DBMS_OUTPUT.PUT_LINE('TASKid BEING UPDATED in newcontract' || :new.taskID);
 
 IF conCount < 3 Then
     conCount := conCount +1;
@@ -36,13 +17,42 @@ End IF;
 END;
 /
 
+-- BUG IS DELETING CONTRACT COUNT 3 TIMES OVER UNTIL ZERO DUE TO MULTIPLE TASK 
+CREATE or REPLACE TRIGGER EndContract
+BEFORE DELETE ON Contract FOR EACH ROW
+DECLARE
+conCount Number;
+BEGIN
+Select ContractCount into conCount from Task Where TaskID = :OLD.taskID;
+DBMS_OUTPUT.PUT_LINE('Deleting contract from task ' || :OLD.taskID || 'currentCount ' || conCOunt);
+
+IF conCount > 0 Then
+    conCount := conCount - 1;
+    DBMS_OUTPUT.PUT_LINE('Contract Count for ' ||:OLD.taskID|| ' is ' || conCOunt);
+    Update Task SET contractCount = conCount Where taskID = :OLD.taskID;
+ELSE
+    Update Task SET contractCount = conCount Where taskID = :OLD.taskID;
+    raise_application_error (-20101,'Contract is empty');
+End IF;
+END;
+/
+
+CREATE or REPLACE TRIGGER NoChanges
+Before Update ON Contract
+DECLARE
+BEGIN
+     DBMS_OUTPUT.PUT_LINE('FIring No Changes');
+    raise_application_error (-20101,'No Updates are Permitted');
+END;
+/
 
 
-insert into contract values('901','9',0);
+--DELETE FROM CONTRACT WHERE TASKID = '333';
+UPDATE CONTRACT SET TASKID = '123' WHERE TASKID = '333';
 --Select * from task;
-
+--Select * from Contract;
 --Insert into Task VALUES ('901', 'Gardening',0);
-
+--Insert into Contract Values ('333', '59', 0);
 --UPDATE Task SET ContractCount = 0 WHere TaskID = 333;
 
 
